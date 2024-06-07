@@ -1,0 +1,118 @@
+nextflow_process {
+
+  name "Test COPY_ZIP"
+
+  script "tests/copy_zip/copy_zip.nf"
+  process "COPY_ZIP"
+
+  test("Should work with ZIP") {
+
+    when {
+      process {
+        """
+        input[0] = file("${projectDir}/tests/three-files.zip")
+        """
+      }
+    }
+
+    then {
+      def filename = process.out.zip.get(0)
+      assert path(filename).zip.isValid()
+      assert !path(filename).zip.isEncrypted()
+      assert path(filename).zip.getNumberOfFiles() == 3
+      assert path(filename).zip.extract("file_1.txt").text == "Lukas 1"
+      assert path(filename).zip.extract("file_2.txt").text == "Lukas 2"
+      assert path(filename).zip.extract("file_3.txt").text == "Lukas 3"
+
+      assert zip(filename).isValid()
+      assert !zip(filename).isEncrypted()
+      assert zip(filename).getNumberOfFiles() == 3
+      assert zip(filename).extract("file_1.txt").text == "Lukas 1"
+      assert zip(filename).extract("file_2.txt").text == "Lukas 2"
+      assert zip(filename).extract("file_3.txt").text == "Lukas 3"
+
+      def paths = zip(filename).extractAll()
+      assert paths.size() == 3
+
+      for (p in paths) {
+        assert p.exists()
+        println p
+      }
+
+    }
+ }
+
+ test("Should work with ZIP and subfolders") {
+
+    when {
+      process {
+        """
+        input[0] = file("${projectDir}/tests/three-files-subfolder.zip")
+        """
+      }
+    }
+
+    then {
+      def filename = process.out.zip.get(0)
+      assert path(filename).zip.isValid()
+      assert !path(filename).zip.isEncrypted()
+      assert path(filename).zip.getNumberOfFiles() == 3
+      assert path(filename).zip.extract("subfolder/file_1.txt").text == "Lukas 1"
+      assert path(filename).zip.extract("subfolder/file_2.txt").text == "Lukas 2"
+      assert path(filename).zip.extract("subfolder/file_3.txt").text == "Lukas 3"
+
+      assert zip(filename).isValid()
+      assert !zip(filename).isEncrypted()
+      assert zip(filename).getNumberOfFiles() == 3
+      assert zip(filename).extract("subfolder/file_1.txt").text == "Lukas 1"
+      assert zip(filename).extract("subfolder/file_2.txt").text == "Lukas 2"
+      assert zip(filename).extract("subfolder/file_3.txt").text == "Lukas 3"
+
+      def paths = zip(filename).extractAll()
+      assert paths.size() == 3
+
+      for (p in paths) {
+        assert p.exists()
+        println p
+      }
+
+    }
+ }
+
+ test("Should work with invalid ZIP") {
+
+    when {
+      process {
+        """
+        input[0] = file("${projectDir}/tests/invalid.zip")
+        """
+      }
+    }
+
+    then {
+      def filename = process.out.zip.get(0)
+      assert !path(filename).zip.isValid()
+      assert !path(filename).zip.isEmpty()
+    }
+
+  }
+
+test("Should work with empty ZIP") {
+
+    when {
+      process {
+        """
+        input[0] = file("${projectDir}/tests/invalid-empty.zip")
+        """
+      }
+    }
+
+    then {
+      def filename = process.out.zip.get(0)
+      assert path(filename).zip.isEmpty()
+      assert path(filename).zip.isValid()
+    }
+
+  }
+
+}

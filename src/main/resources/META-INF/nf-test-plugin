@@ -1,0 +1,5 @@
+moduleName=nft-compress
+moduleVersion=0.1.0
+moduleAuthors=Lukas Forer
+extensionClasses=lukfor.nf.test.compress.PathExtension
+extensionMethods=lukfor.nf.test.compress.Methods
