@@ -1,6 +1,6 @@
 # nft-compress
 
-nf-test plugin to provide support for ZIP and GZIP files.
+nf-test plugin to provide support for ZIP files.
 
 ## Requirements
 
