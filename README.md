@@ -20,20 +20,56 @@ config {
 
 ## Usage
 
-nf-test extends `path` by a `fasta` property that can be used to read FASTA files into maps. nf-test supports also gzipped FASTA files.
+nf-test extends `path` by a `zip` property that can be used to extract zip files and to get access to the entries as `path` objects.
 
 
-### Comparing files
+### Examples
 
-```Groovy
-assert path('path/to/fasta1.compress').fasta == path("path/to/fasta2.compress'").fasta
-```
-
-### Working with individual samples
+The `zip` property offers various features to validate zip files and access their entries:
 
 ```Groovy
-def sequences = path('path/to/fasta1.compress.gz').fasta
-assert "seq1" in sequences
-assert !("seq8" in sequences)
-assert sequences.seq1 == "AGTACGTAGTAGCTGCTGCTACGTGCGCTAGCTAGTACGTCACGACGTAGATGCTAGCTGACTCGATGC"
+def filename = process.out.zip.get(0)
+assert path(filename).zip.isValid()
+assert !path(filename).zip.isEncrypted()
+assert path(filename).zip.getNumberOfFiles() == 3
+assert path(filename).zip.extract("file_1.txt").text == "Lukas 1"
+assert path(filename).zip.extract("file_2.txt").text == "Lukas 2"
+assert path(filename).zip.extract("file_3.txt").text == "Lukas 3"
 ```
+
+Instead of using the `zip` property of a `path` object, you could also use the `zip` function:
+
+```Groovy
+assert zip(filename).isValid()
+assert !zip(filename).isEncrypted()
+assert zip(filename).getNumberOfFiles() == 3
+assert zip(filename).extract("file_1.txt").text == "Lukas 1"
+assert zip(filename).extract("file_2.txt").text == "Lukas 2"
+assert zip(filename).extract("file_3.txt").text == "Lukas 3"
+```
+
+Extracting all files in a zip file:
+
+```
+def paths = zip(filename).extractAll()
+assert paths.size() == 3
+```
+
+Working with encrypted zip files:
+
+```Groovy
+assert zip(filename).password("my-password").extract("file_1.txt").text == "Lukas 1"
+assert !zip(filename).isEncrypted()
+```
+
+Handling zip files that contain subfolders:
+
+```Groovy
+assert path(filename).zip.extract("subfolder/file_1.txt").text == "Lukas 1"
+assert path(filename).zip.extract("subfolder/file_2.txt").text == "Lukas 2"
+assert path(filename).zip.extract("subfolder/file_3.txt").text == "Lukas 3"
+```
+
+## Contact
+
+Lukas Forer (@lukfor)
