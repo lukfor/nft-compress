@@ -20,7 +20,7 @@ config {
 
 ## Usage
 
-nf-test extends `path` by a `zip` property that can be used to extract zip files and to get access to the entries as `path` objects.
+nft-compress extends `path` by a `zip` property that can be used to extract zip files and to get access to the entries as `path` objects.
 
 
 ### Examples
