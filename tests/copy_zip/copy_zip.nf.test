@@ -115,4 +115,42 @@ test("Should work with empty ZIP") {
 
   }
 
+  test("Should work with encrypted ZIP") {
+
+    when {
+      process {
+        """
+        input[0] = file("${projectDir}/tests/three-files-encrypted.zip")
+        """
+      }
+    }
+
+    then {
+      def zipFile = path(process.out.zip.get(0)).zip(password: "lukas")
+      assert zipFile.isValid()
+      assert zipFile.isEncrypted()
+      assert zipFile.getNumberOfFiles() == 3
+      assert zipFile.extract("file_1.txt").text == "Lukas 1"
+      assert zipFile.extract("file_2.txt").text == "Lukas 2"
+      assert zipFile.extract("file_3.txt").text == "Lukas 3"
+
+      def zipFile2 = zip(process.out.zip.get(0), password: "lukas")
+      assert zipFile2.isValid()
+      assert zipFile2.isEncrypted()
+      assert zipFile2.getNumberOfFiles() == 3
+      assert zipFile2.extract("file_1.txt").text == "Lukas 1"
+      assert zipFile2.extract("file_2.txt").text == "Lukas 2"
+      assert zipFile2.extract("file_3.txt").text == "Lukas 3"
+
+      def paths = zip(process.out.zip.get(0), password: "lukas").extractAll()
+      assert paths.size() == 3
+
+      for (p in paths) {
+        assert p.exists()
+        println p
+      }
+
+    }
+ }
+
 }

@@ -58,6 +58,8 @@ assert paths.size() == 3
 Working with encrypted zip files:
 
 ```Groovy
+assert zip(filename, password: "my-password").extract("file_1.txt").text == "Lukas 1"
+//or 
 assert zip(filename).password("my-password").extract("file_1.txt").text == "Lukas 1"
 assert !zip(filename).isEncrypted()
 ```

@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import net.lingala.zip4j.*;
@@ -20,11 +22,19 @@ public class ZipFileBuilder {
     private String output = "temp";
 
     public ZipFileBuilder(Path path) throws IOException {
+        this(path, new HashMap<String, Object>());
+    }
+
+
+    public ZipFileBuilder(Path path, Map<String, Object> options) throws IOException {
         this.path = path;
         File tempDirectory = Files.createTempDirectory("nft-compress").toFile();
         tempDirectory.deleteOnExit();
         tempDirectory.mkdirs();
         output = tempDirectory.getAbsolutePath();
+        if (options.containsKey("password")) {
+            this.password = (String) options.get("password");
+        }
     }
 
     public ZipFileBuilder password(String password) {
@@ -41,6 +51,10 @@ public class ZipFileBuilder {
 
     public boolean isEmpty() throws IOException {
         return (path.toFile().length() == 0);
+    }
+
+    public boolean exists() throws IOException {
+        return (path.toFile().exists());
     }
 
     public boolean isEncrypted() throws IOException {
